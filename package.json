@@ -1,6 +1,7 @@
 {
   "name": "call-of-code",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,13 +11,17 @@
     "prebuild": "npm run validate-env",
     "clean": "rmdir /s /q .next out node_modules 2>nul || echo Clean complete",
     "clean:build": "rmdir /s /q .next out 2>nul || echo Build clean complete",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "health-check": "node scripts/health-check.js",
+    "pre-commit": "bash scripts/pre-commit.sh"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "firebase": "^10.12.0",
     "next": "^14.2.3",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

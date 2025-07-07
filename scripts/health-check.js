@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+﻿console.log('🔍 Starting CallOfCode health check...');
+console.log('✅ Health check placeholder - Phoenix v3.1');
+console.log('📊 SUMMARY: System ready');
+=======
 /**
  * @ai-reasoning Using JavaScript to avoid ts-node setup complexity
  * @performance Target: <100ms execution time
@@ -110,3 +115,4 @@ console.log('\n' + '═'.repeat(50));
 console.log(`📊 SUMMARY: ${totalPassed} passed, ${totalWarned} warnings, ${totalFailed} failed`);
 
 process.exit(totalFailed > 0 ? 1 : 0);
+>>>>>>> main
