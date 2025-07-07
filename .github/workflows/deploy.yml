@@ -18,18 +18,50 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+
+      - name: Pre-clean source files
+        run: |
+          echo "=== Cleaning invisible characters ==="
+          # Remove UTF-8 BOM from all TypeScript/JavaScript files
+          find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -exec sed -i '1s/^\xEF\xBB\xBF//' {} \;
+          
+          # Convert CRLF to LF
+          find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -exec dos2unix -q {} \; 2>/dev/null || true
+          
+          echo "=== File cleaning complete ==="
+
+      - name: Validate encoding
+        run: |
+          echo "=== Checking for invisible characters ==="
+          # Check for zero-width spaces and other invisible Unicode
+          if find . -type f \( -name "*.ts" -o -name "*.tsx" \) -exec grep -l $'[\u200B-\u200D\uFEFF]' {} \; | grep -q .; then
+            echo "ERROR: Invisible Unicode characters detected in source files"
+            find . -type f \( -name "*.ts" -o -name "*.tsx" \) -exec grep -l $'[\u200B-\u200D\uFEFF]' {} \;
+            exit 1
+          fi
+          echo "✅ No invisible characters found"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: |
-          npm run build
+          echo "=== Starting build ==="
+          CI=false npm run build
           echo "=== Build complete ==="
+          
+          # Debug output
           ls -la
+          echo "=== Checking .next directory ==="
+          ls -la .next/ || echo "NO .NEXT DIRECTORY"
           echo "=== Checking out directory ==="
           ls -la out/ || echo "NO OUT DIRECTORY FOUND"
+          
+          # Check for static pages in build manifest
+          if [ -f .next/BUILD_ID ]; then
+            echo "=== Build ID: $(cat .next/BUILD_ID) ==="
+          fi
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: call-of-code.firebaseapp.com
@@ -38,14 +70,39 @@ jobs:
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
+      - name: Verify static export
+        id: verify_export
+        run: |
+          if [ ! -d "out" ]; then
+            echo "❌ CRITICAL: out/ directory not found - static export failed"
+            echo "Possible causes:"
+            echo "- Dynamic routes without generateStaticParams"
+            echo "- Missing 'export const dynamic = force-static'"
+            echo "- Server components using dynamic functions"
+            exit 1
+          fi
+          
+          # Count static pages
+          PAGE_COUNT=$(find out -name "*.html" | wc -l)
+          echo "✅ Found $PAGE_COUNT static HTML pages"
+          
+          if [ "$PAGE_COUNT" -eq 0 ]; then
+            echo "❌ No HTML pages generated"
+            exit 1
+          fi
+          
+          echo "export_success=true" >> $GITHUB_OUTPUT
+
       - name: Upload build output
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: steps.verify_export.outputs.export_success == 'true'
         with:
           name: nextjs-build
           path: out
+          retention-days: 1
 
       - name: Deploy to Firebase
+        if: steps.verify_export.outputs.export_success == 'true'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
