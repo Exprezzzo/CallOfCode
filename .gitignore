@@ -1,3 +1,11 @@
-node_modules/
+# Firebase + Next.js build artifacts
 .next/
+out/
+build/
+dist/
+.firebase/
+node_modules/
 .env
+.env.local
+.DS_Store
+*.log
