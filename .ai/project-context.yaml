@@ -1,0 +1,10 @@
+architecture: Next.js 14 App Router + Firebase Hosting
+patterns_used: ["singleton", "factory", "observer"]
+scaling_targets: 100K users
+cost_constraints: $500/month
+decisions_log:
+  - Used Firestore over RTDB for indexable queries
+  - Enforced static export to leverage Firebase CDN
+  - Added CI=false for predictable builds
+  - Unicode guards prevent mobile-file corruption
+  - GitHub Actions now enforce out/ directory checks
