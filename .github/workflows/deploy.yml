@@ -27,6 +27,13 @@ jobs:
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: nextjs-build
+          path: out
+
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -34,10 +41,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: call-of-code
-
-      - name: Upload build output (out/)
-        uses: actions/upload-artifact@v4
-        if: success() || failure()  # Always run
-        with:
-          name: nextjs-exported-build
-          path: out
