@@ -1,0 +1,7 @@
+﻿{
+  'phoenix_features': {
+    'context_memory': true,
+    'storytime_mode': true,
+    'enabled_projects': ['eis', 'callofcode', 'gray-panthers']
+  }
+}
