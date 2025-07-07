@@ -1,6 +1,6 @@
 # 🎮 CallOfCode – Voice-Driven Game Engine (v1.0.0)
 
-**CallOfCode** is the world’s first multiplayer game engine powered by voice and AI..
+**CallOfCode** is the world’s first multiplayer game engine powered by voice and AI.
 
 Create entire games by simply speaking: from FPS arenas and puzzle adventures to zombie co-op missions — CallOfCode turns your words into playable worlds.
 
